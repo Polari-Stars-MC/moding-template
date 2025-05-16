@@ -2,11 +2,8 @@ import org.polaris2023.mcmeta.extension.McMetaSettings
 import org.polaris2023.mcmeta.extension.forge.ForgeLikeDependency
 import org.polaris2023.mcmeta.extension.forge.ForgeLikeToml
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeDependency
-import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeDependency.NeoForgeDependencyBuilder
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeMods
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeModsToml
-import org.slf4j.event.Level
-import java.util.Properties
 
 buildscript {
     repositories {
@@ -14,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.3")
+        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.3-fix")
     }
 }
 
@@ -25,7 +22,6 @@ plugins {
     idea
     base
     alias(libs.plugins.mod.dev.gradle)
-    id("tasks-merge")
 }
 val mcVersion: String by rootProject
 val mcVersionRange: String by rootProject
@@ -72,15 +68,59 @@ val lib = libs
 
 subprojects {
     apply(plugin = lib.plugins.mod.dev.gradle.get().pluginId)
-    configure<McMetaSettings> {
-        this.loaderType = McMetaSettings.Type.NEOFORGE
-    }
+
 	
     val modId: String by project
     val modName: String by project
     val modVersion: String by project
     val modClassPrefix: String by project
 
+    neoForge {
+        version = neoVersion
+        parchment {
+            minecraftVersion = parchmentMinecraftVersion
+            mappingsVersion = parchmentMappingsVersion
+        }
+    }
+
+    configure<McMetaSettings> {
+        this.loaderType = McMetaSettings.Type.NEOFORGE
+    }
+    configure<NeoForgeModsToml> {
+        mods.add(NeoForgeMods(project).apply {
+            this.modId = modId
+            namespace = modId
+            version = modVersion
+            displayName = modName
+            authors = modAuthors
+            logoFile = "$modId.png"
+            description = "This is $modName"
+        })
+        dependencies().put(modId, arrayOf(
+            NeoForgeDependency
+                .builder()
+                .type(NeoForgeDependency.Type.required)
+                .like(ForgeLikeDependency
+                    .builder()
+                    .modId("neoforge")
+                    .versionRange(neoVersionRange)
+                    .ordering(ForgeLikeDependency.Order.NONE)
+                    .side(ForgeLikeDependency.Side.BOTH)
+                    .build())
+                .build(),
+            NeoForgeDependency
+                .builder()
+                .type(NeoForgeDependency.Type.required)
+                .like(ForgeLikeDependency
+                    .builder()
+                    .modId("minecraft")
+                    .versionRange(mcVersionRange)
+                    .ordering(ForgeLikeDependency.Order.NONE)
+                    .side(ForgeLikeDependency.Side.BOTH)
+                    .build())
+                .build()
+        ))
+    }
 
     base {
         archivesName = modId
