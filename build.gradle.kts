@@ -74,12 +74,57 @@ subprojects {
     val modName: String by project
     val modVersion: String by project
     val modClassPrefix: String by project
+    val generatedDir = file("build/generated/data/")
+    val resourcesDir = rootProject.file("src/${modId}/resources/")
+    val javaDir = rootProject.file("src/${modId}/java/")
+
+    sourceSets {
+        main {
+            java {
+                srcDir(javaDir)
+            }
+            resources {
+                srcDir(generatedDir)
+                srcDir(resourcesDir)
+            }
+        }
+    }
 
     neoForge {
         version = neoVersion
         parchment {
             minecraftVersion = parchmentMinecraftVersion
             mappingsVersion = parchmentMappingsVersion
+        }
+        runs {
+            register("client") {
+                client()
+                systemProperty("neoforge.enabledGameTestNamespaces", modId)
+                gameDirectory.set(rootProject.file("run/${modId}/client"))
+            }
+            register("server") {
+                server()
+                programArgument("--nogui")
+                systemProperty("neoforge.enabledGameTestNamespaces", modId)
+                gameDirectory.set(rootProject.file("run/${modId}/server"))
+            }
+            register("gameTestServer") {
+                type = "gameTestServer"
+                systemProperty("neoforge.enabledGameTestNamespaces", modId)
+                gameDirectory.set(rootProject.file("run/${modId}/test-server"))
+            }
+            register("data") {
+                data()
+                environment("wild-wind-datagen", "true")
+                programArguments.addAll(listOf(
+                    "--mod", modId, "--all",
+                    "--output", generatedDir.absolutePath,
+                    "--existing", resourcesDir.absolutePath,
+                ))
+                gameDirectory.set(rootProject.file("run/${modId}/data"))
+            }
+
+
         }
     }
 
