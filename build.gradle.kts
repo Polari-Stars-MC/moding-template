@@ -22,6 +22,7 @@ plugins {
     idea
     base
     alias(libs.plugins.mod.dev.gradle)
+    id("io.github.jeadyx.sonatype-uploader").version("2.8")
 }
 val mcVersion: String by rootProject
 val mcVersionRange: String by rootProject
@@ -38,6 +39,7 @@ allprojects {
     apply(plugin = "java-library")
     apply(plugin = "idea")
     apply(plugin = "io.github.Polari-Stars-MC.mcmeta-plugin")
+    apply(plugin = "io.github.jeadyx.sonatype-uploader")
     configure<McMetaSettings> {
         loaderType = McMetaSettings.Type.DEFAULT
     }
@@ -62,6 +64,8 @@ allprojects {
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
     }
+
+
 }
 
 val lib = libs
@@ -177,6 +181,39 @@ subprojects {
 
     tasks.jarJar {
         enabled = true
+    }
+
+    sonatypeUploader {
+        tokenName = properties["central.sonatype.token.name"].toString()
+        tokenPasswd = properties["central.sonatype.token.passwd"].toString()
+        signing = Action {
+            this.keyId = properties["signing.key.id"].toString()
+            this.keyPasswd = properties["signing.key.passwd"].toString()
+            this.secretKeyPath = properties["signing.secret.key"].toString()
+        }
+        pom = Action {
+            name.set(modName + ": " + project.name)
+            description.set("This is ${modName + ": " + project.name}")
+            url.set("https://github.com/Polari-Stars-MC/WildWind")
+            licenses {
+                license {
+                    name.set("LGPL-2.1")
+                    url = "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html"
+                }
+            }
+            developers {
+                developer {
+                    id.set("baka4n")
+                    name.set("baka4n")
+                    email.set("474899581@qq.com")
+                }
+            }
+            scm {
+                connection = "scm:git:git://github.com/Polaris-Stars-MC/WildWind.git"
+                developerConnection = "scm:git:ssh://github.com/Polaris-Stars-MC/WildWind.git"
+                url = "https://github.com/Polaris-Stars-MC/WildWind"
+            }
+        }
     }
 }
 
