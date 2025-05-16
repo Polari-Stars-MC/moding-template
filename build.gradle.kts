@@ -87,14 +87,15 @@ subprojects {
         this.loaderType = McMetaSettings.Type.NEOFORGE
     }
     configure<NeoForgeModsToml> {
+
         mods.add(NeoForgeMods(project).apply {
             this.modId = modId
             namespace = modId
             version = modVersion
-            displayName = modName
+            displayName = modName + ": " + project.name
             authors = modAuthors
             logoFile = "$modId.png"
-            description = "This is $modName"
+            description = "This is ${displayName.get()}"
         })
         dependencies().put(modId, arrayOf(
             NeoForgeDependency
