@@ -49,7 +49,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://maven.neoforged.net/releases")
+//        maven("https://maven.neoforged.net/releases")
+        maven("https://maven.creeperhost.net/")
     }
     configure<ForgeLikeToml> {
         loaderVersion = loaderVersionRange
@@ -88,6 +89,7 @@ subprojects {
     javaDir.mkdirs()
     val mixinsFile = resourcesDir.resolve("META-INF/$modId.mixins.json")
     val atFile = resourcesDir.resolve("META-INF/accesstransformer.cfg")
+    val enumFile = resourcesDir.resolve("META-INF/enumextensions.json")
 
     sourceSets {
         main {
@@ -143,6 +145,10 @@ subprojects {
         atFile.parentFile.mkdirs()
         atFile.createNewFile()
     }
+    if(enumFile.exists().not()) {
+        enumFile.parentFile.mkdirs()
+        enumFile.createNewFile()
+    }
 
     configure<McMetaSettings> {
         this.loaderType = McMetaSettings.Type.NEOFORGE
@@ -157,6 +163,9 @@ subprojects {
             authors = modAuthors
             logoFile = "$modId.png"
             description = "This is ${displayName.get()}"
+            if (enumFile.readBytes().isNotEmpty()) {
+                enumExtensions = "META-INF/enumextensions.json"
+            }
         })
         dependencies().put(modId, arrayOf(
             NeoForgeDependency
@@ -215,6 +224,9 @@ subprojects {
     tasks.jar {
         if (atFile.readBytes().isEmpty()) {
             exclude("META-INF/accesstransformer.cfg")
+        }
+        if (enumFile.readBytes().isEmpty()) {
+            exclude("META-INF/enumextensions.json")
         }
     }
 
