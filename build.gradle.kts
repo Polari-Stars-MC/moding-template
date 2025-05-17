@@ -7,6 +7,7 @@ import org.polaris2023.mcmeta.extension.forge.ForgeLikeToml
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeDependency
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeMods
 import org.polaris2023.mcmeta.extension.forge.neo.NeoForgeModsToml
+import org.slf4j.event.Level
 
 buildscript {
     repositories {
@@ -136,8 +137,16 @@ subprojects {
                 ))
                 gameDirectory.set(rootProject.file("run/${modId}/data"))
             }
+            configureEach {
+                systemProperty("forge.logging.markers", "REGISTRIES")
+                logLevel = Level.DEBUG
+            }
 
-
+        }
+        mods {
+            register(modId) {
+                sourceSet(sourceSets["main"])
+            }
         }
     }
 
