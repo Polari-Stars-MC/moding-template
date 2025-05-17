@@ -15,7 +15,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.3-fix-2")
+        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.4-fix")
     }
 }
 
@@ -100,7 +100,7 @@ subprojects {
             resources {
                 srcDir(generatedDir)
                 srcDir(resourcesDir)
-                srcDir(file("build/generated/modMetaData"))
+                srcDir(layout.buildDirectory.dir("generated/modMetaData"))
             }
         }
     }
