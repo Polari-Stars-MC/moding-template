@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "package": "org.polaris2023.ww_deco.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "ww_deco.remap.json",
+  "mixins": [],
+  "client": [],
+  "server": [],
+  "minVersion": "0.8"
+}

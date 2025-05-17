@@ -1,3 +1,6 @@
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import org.polaris2023.mcmeta.extension.McMetaSettings
 import org.polaris2023.mcmeta.extension.forge.ForgeLikeDependency
 import org.polaris2023.mcmeta.extension.forge.ForgeLikeToml
@@ -81,6 +84,10 @@ subprojects {
     val generatedDir = file("build/generated/data/")
     val resourcesDir = rootProject.file("src/${modId}/resources/")
     val javaDir = rootProject.file("src/${modId}/java/")
+    resourcesDir.mkdirs()
+    javaDir.mkdirs()
+    val mixinsFile = resourcesDir.resolve("META-INF/$modId.mixins.json")
+    val atFile = resourcesDir.resolve("META-INF/accesstransformer.cfg")
 
     sourceSets {
         main {
@@ -132,6 +139,11 @@ subprojects {
         }
     }
 
+    if (atFile.exists().not()) {
+        atFile.parentFile.mkdirs()
+        atFile.createNewFile()
+    }
+
     configure<McMetaSettings> {
         this.loaderType = McMetaSettings.Type.NEOFORGE
     }
@@ -170,6 +182,40 @@ subprojects {
                     .build())
                 .build()
         ))
+        mixins().add("META-INF/$modId.mixins.json")
+        if (atFile.readBytes().isNotEmpty()) {
+            accessTransformers().add("META-INF/accesstransformer.cfg")
+        }
+    }
+
+    val gson = GsonBuilder().setPrettyPrinting().create()
+
+
+    if (mixinsFile.exists().not()) {
+        mixinsFile.parentFile.mkdirs()
+        val mixinJson = JsonObject().apply {
+            addProperty("required", true)
+            addProperty("package", "org.polaris2023.$modId.mixin")
+            addProperty("compatibilityLevel", "JAVA_21")
+            addProperty("refmap", "$modId.remap.json")
+            add("mixins", JsonArray())
+            add("client", JsonArray())
+            add("server", JsonArray())
+            addProperty("minVersion", "0.8")
+
+        }
+        mixinsFile.bufferedWriter(Charsets.UTF_8).use {
+            gson.toJson(mixinJson, it)
+        }
+    }
+
+    if (atFile.readBytes().isNotEmpty()) {
+        neoForge.setAccessTransformers(atFile)
+    }
+    tasks.jar {
+        if (atFile.readBytes().isEmpty()) {
+            exclude("META-INF/accesstransformer.cfg")
+        }
     }
 
     base {
