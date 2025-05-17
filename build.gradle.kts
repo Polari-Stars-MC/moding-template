@@ -15,7 +15,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.3-fix")
+        classpath("io.github.polari-stars-mc:mcmeta-plugin:0.0.3-fix-2")
     }
 }
 
@@ -50,8 +50,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-//        maven("https://maven.neoforged.net/releases")
-        maven("https://maven.creeperhost.net/")
+        maven("https://maven.neoforged.net/releases")
+//        maven("https://maven.creeperhost.net/")
     }
     configure<ForgeLikeToml> {
         loaderVersion = loaderVersionRange
@@ -100,6 +100,7 @@ subprojects {
             resources {
                 srcDir(generatedDir)
                 srcDir(resourcesDir)
+                srcDir(file("build/generated/modMetaData"))
             }
         }
     }
